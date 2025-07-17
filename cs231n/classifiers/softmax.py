@@ -34,11 +34,19 @@ def softmax_loss_naive(W, X, y, reg):
 
         # compute the probabilities in numerically stable way
         scores -= np.max(scores)
+        '''softmax'''
         p = np.exp(scores)
-        p /= p.sum()  # normalize
+        p /= p.sum(keepdims=True)  # normalize
         logp = np.log(p)
 
         loss -= logp[y[i]]  # negative log probability is the loss
+        
+        # Gradient 계산
+        for j in range(num_classes):
+            if j == y[i]:
+                dW[:, j] += (p[j] - 1) * X[i]
+            else:
+                dW[:, j] += p[j] * X[i]
 
 
     # normalized hinge loss plus regularization
@@ -52,8 +60,7 @@ def softmax_loss_naive(W, X, y, reg):
     # loss is being computed. As a result you may need to modify some of the    #
     # code above to compute the gradient.                                       #
     #############################################################################
-
-
+    dW= dW / num_train + 2*reg*W
     return loss, dW
 
 
@@ -73,7 +80,11 @@ def softmax_loss_vectorized(W, X, y, reg):
     # Implement a vectorized version of the softmax loss, storing the           #
     # result in loss.                                                           #
     #############################################################################
-
+    scores= X.dot(W)
+    scores -= np.max(scores, axis=1,keepdims=True )
+    
+    p= np.exp(scores)
+    p /= np.sum(p,axis=1, keepdims=True)
 
     #############################################################################
     # TODO:                                                                     #
@@ -84,6 +95,15 @@ def softmax_loss_vectorized(W, X, y, reg):
     # to reuse some of the intermediate values that you used to compute the     #
     # loss.                                                                     #
     #############################################################################
-
+    logp_correct= -np.log(p[np.arrange(N),y])
+    loss= np.sum(logp_correct)/ X.shape[0]
+    loss += reg + np.sum(W*W)    
+    
+    dscore= p[np.arrange[X.shape[0],y]] -= 1
+    dW= X.T.dot()
+    
+    
+    
 
     return loss, dW
+
