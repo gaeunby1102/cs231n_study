@@ -1,6 +1,6 @@
 from .layers import *
 
-
+#x → [Affine: xW + b] → [ReLU: max(0, ·)] → out
 def affine_relu_forward(x, w, b):
     """
     Convenience layer that perorms an affine transform followed by a ReLU

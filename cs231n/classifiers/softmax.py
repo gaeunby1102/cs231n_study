@@ -80,7 +80,7 @@ def softmax_loss_vectorized(W, X, y, reg):
     # Implement a vectorized version of the softmax loss, storing the           #
     # result in loss.                                                           #
     #############################################################################
-    scores= X.dot(W)
+    scores= X.dot(W) # class score for each sample
     scores -= np.max(scores, axis=1,keepdims=True )
     
     p= np.exp(scores)
@@ -96,14 +96,14 @@ def softmax_loss_vectorized(W, X, y, reg):
     # loss.                                                                     #
     #############################################################################
     logp_correct= -np.log(p[np.arrange(N),y])
-    loss= np.sum(logp_correct)/ X.shape[0]
-    loss += reg + np.sum(W*W)    
+    loss= np.sum(logp_correct)/ X.shape[0] #avg cross-entropy loss
+    loss += reg * np.sum(W*W)    # L2 norm
     
-    dscore= p[np.arrange[X.shape[0],y]] -= 1
-    dW= X.T.dot()
-    
-    
-    
+    dscore= p.copy() # softmax prob. gradient 2d tensor
+    dscore[np.arrange[X.shape[0],y]]-=1 # -1 for true
+    dscore /= N
+    dW= X.T.dot(dscore)
+    dW += 2 * reg * W #L2 norm
 
     return loss, dW
 

@@ -27,11 +27,14 @@ def affine_forward(x, w, b):
     # TODO: Implement the affine forward pass. Store the result in out. You   #
     # will need to reshape the input into rows.                               #
     ###########################################################################
-
+    N= x.shape[0]
+    reshaped_x= x.reshape(N,-1) #flattening
+    out= reshaped_x.dot(w)+b
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    cache = (x, w, b)
+    cache = (x, w, b) # for backprop
     return out, cache
 
 
@@ -40,8 +43,8 @@ def affine_backward(dout, cache):
     Computes the backward pass for an affine layer.
 
     Inputs:
-    - dout: Upstream derivative, of shape (N, M)
-    - cache: Tuple of:
+    - dout: Upstream derivative from upper layrt, of shape (N, M)
+    - cache: Tuple of from forward:
       - x: Input data, of shape (N, d_1, ... d_k)
       - w: Weights, of shape (D, M)
       - b: Biases, of shape (M,)
@@ -56,7 +59,12 @@ def affine_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
-
+    N= x.shape[0]
+    reshaped_x= x.reshape(N,-1) #flattening
+    dw= reshaped_x.T.dot(dout) # cal. weight gradient
+    dx= dout.dot(w.T).reshape(x.shape) #input gradient -> reshaping into x form
+    db= np.sum(dout, axis=0) # bias gradient
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -78,7 +86,7 @@ def relu_forward(x):
     ###########################################################################
     # TODO: Implement the ReLU forward pass.                                  #
     ###########################################################################
-
+    out= np.maximum(0,x)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -101,7 +109,7 @@ def relu_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
-
+    dx= dout * (x>0)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -714,7 +722,18 @@ def softmax_loss(x, y):
     ###########################################################################
     # TODO: Copy over your solution from A1.
     ###########################################################################
-
+    N = x.shape[0] 
+    shifted_x= x - np.max(x, axis=1, keepdims=True)
+    Z = np.sum(np.exp(shifted_x), axis=1, keepdims=True)
+    log_probs = shifted_x - np.log(Z)
+    probs = np.exp(log_probs)
+    
+    loss = -np.sum(log_probs[np.arange(N), y]) / N 
+    
+    dx = probs.copy()
+    dx[np.arange(N), y] -= 1   
+    dx /= N 
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
